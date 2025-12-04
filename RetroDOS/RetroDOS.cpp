@@ -12,20 +12,15 @@
 namespace fs = std::filesystem;
 
 int main() {
-
-    // Hide console cursor
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hOut, &cursorInfo);
-    cursorInfo.bVisible = FALSE;
-    SetConsoleCursorInfo(hOut, &cursorInfo);
+    DoubleBuffer::Init(); // Basic console initialization
 
     try {
         Explorer explorer;
         explorer.Run();
     }
-    catch (...) {
-        // Silent exit
+    catch (const std::exception& e) {
+        // In case of error, restore console and print
+        std::cerr << "An error occurred: " << e.what() << std::endl;
     }
 
     return 0;

@@ -6,7 +6,16 @@
 #include <atomic>
 #include <thread>
 
+namespace fs = std::filesystem;
 
+// Represents a single file or directory entry in the list
+struct FileEntry {
+    std::string name;
+    uint64_t size;
+    bool isDir;
+    fs::file_time_type date;
+    DWORD attr;
+};
 
 class InputManager {
 public:
@@ -39,7 +48,7 @@ private:
     static std::atomic<bool> mouseWheelDown;
 };
 
-/*
+
 // Forward-declare DoubleBuffer interface (defined in retro.h/DoubleBuffer.cpp)
 class DoubleBuffer;
 
@@ -57,6 +66,7 @@ private:
     void DrawStatusBar();
     void DrawUI();
 
+    void HandleKeyboard(int key);
     void HandleMouse();
 
     // state
@@ -64,12 +74,14 @@ private:
     fs::path cur;
     int sel;
     int top;
+    int mouseOver;
 
     const int FILE_LIST_HEIGHT = 20;
     const int SPLIT_ROW = 22;
 
     bool needsRedraw;
     bool needsReload;
+    bool running;
 
     uint64_t totalFiles;
     uint64_t totalDirs;
@@ -78,4 +90,3 @@ private:
     std::string statusMessage;
     unsigned long long statusMessageTime; // use 64-bit time from GetTickCount64()
 };
-*/
