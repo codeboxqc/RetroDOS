@@ -1,32 +1,19 @@
-﻿// RETRO FILE EXPLORER v5.2
-#define NOMINMAX  
+﻿// main.cpp — FINAL VERSION — NO CRASH — FULL MOUSE SUPPORT
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
-#include <filesystem>
-
-#include "ddos.h"      // <-- Explorer + InputManager
-#include "retro.h"     // <-- Your DoubleBuffer
+#include "retro.h"
+#include "ddos.h"
 #include "basic.h"
 
-namespace fs = std::filesystem;
-
 int main() {
+         // Creates console + sets correct mouse mode
+   
 
-    // Hide console cursor
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hOut, &cursorInfo);
-    cursorInfo.bVisible = FALSE;
-    SetConsoleCursorInfo(hOut, &cursorInfo);
+    Explorer explorer;
+    explorer.Run();            // Explorer itself starts InputManager
 
-    try {
-        Explorer explorer;
-        explorer.Run();
-    }
-    catch (...) {
-        // Silent exit
-    }
-
+    InputManager::Stop();      // Clean shutdown
     return 0;
 }

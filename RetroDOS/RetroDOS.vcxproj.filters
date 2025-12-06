@@ -21,7 +21,7 @@
     <ClCompile Include="basic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ok.cpp">
+    <ClCompile Include="more.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="retro.cpp">

@@ -1,4 +1,4 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
@@ -20,39 +20,31 @@ ColorScheme colors;
 void DoubleBuffer::SetupConsole()
 {
     AllocConsole();
-
-    FILE* f;
-    freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONIN$", "r", stdin);
+    SetConsoleTitleW(L"RETRO EXPLORER");
 
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
 
+    // Wait until handles are valid
+    int attempts = 0;
+    while (hIn == INVALID_HANDLE_VALUE || hIn == NULL) {
+        Sleep(10);
+        hIn = GetStdHandle(STD_INPUT_HANDLE);
+        if (++attempts > 50) break;
+    }
+
     COORD size = { WIDTH, HEIGHT };
     SetConsoleScreenBufferSize(hOut, size);
-
     SMALL_RECT rect = { 0, 0, WIDTH - 1, HEIGHT - 1 };
     SetConsoleWindowInfo(hOut, TRUE, &rect);
 
-    CONSOLE_CURSOR_INFO ci = { 100, FALSE };
+    CONSOLE_CURSOR_INFO ci = { 1, FALSE };
     SetConsoleCursorInfo(hOut, &ci);
 
-    // Setup output mode
-    DWORD outMode = 0;
-    GetConsoleMode(hOut, &outMode);
-    outMode |= ENABLE_PROCESSED_OUTPUT;
-    outMode |= ENABLE_WRAP_AT_EOL_OUTPUT;
-    SetConsoleMode(hOut, outMode);
-
-    // Setup input mode - CRITICAL for mouse support
-    DWORD inMode = 0;
-    GetConsoleMode(hIn, &inMode);
-    inMode |= ENABLE_MOUSE_INPUT;           // Enable mouse events
-    inMode |= ENABLE_EXTENDED_FLAGS;        // Required for disabling quick edit
-    inMode &= ~ENABLE_QUICK_EDIT_MODE;      // Disable quick edit (blocks mouse)
-    inMode &= ~ENABLE_WINDOW_INPUT;         // Don't need window resize events
-    inMode |= ENABLE_PROCESSED_INPUT;       // Process Ctrl+C etc.
-    SetConsoleMode(hIn, inMode);
+    // FINAL INPUT MODE — NO CRASH, FULL MOUSE
+    DWORD mode = ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS;
+    mode &= ~ENABLE_QUICK_EDIT_MODE;
+    SetConsoleMode(hIn, mode);
 }
 
 void DoubleBuffer::Init()

@@ -11,8 +11,6 @@
 #include <conio.h>
 #include <sstream>
 
-
-
 #include "ddos.h"
 #include "retro.h"
 
@@ -27,7 +25,6 @@ struct FileEntry {
     bool selected = false;
 };
 
-// Forward-declare DoubleBuffer interface (defined in retro.h/DoubleBuffer.cpp)
 class DoubleBuffer;
 
 class Explorer {
@@ -43,6 +40,35 @@ private:
     void DrawInfoPanel();
     void DrawStatusBar();
     void DrawUI();
+
+    void FastCopyClipboard();
+    void PasteClipboard();
+    void DeleteSelected();
+    void CopySelected();
+    void RenameSelected();
+    void CreateNewFolder();
+    void CutSelected();
+    void ClearSelection();
+
+    void LoadDriveLetters();
+    void HandleButtonClicks(int mx, int my);
+    std::string GetDriveType(const std::string& drive);
+    void ChangeDrive(int driveIndex);
+    void ChangeDriveByLetter(char letter);  // NEW: Shift+Letter to change drive
+    void HandleDriveSelection(int mx, int my);
+    void DrawOperationButtons();
+    void DrawDriveLetters();
+    void HandleRenameInput(int key);
+
+    void DrawAttributeButtons();
+    void ToggleFileAttribute(const fs::path& path, DWORD attribute);
+
+
+    int btnCopyX = 5, btnCopyY = 1;
+    int btnPasteX = 18, btnPasteY = 1;
+    int btnDeleteX = 32, btnDeleteY = 1;
+    int btnRenameX = 47, btnRenameY = 1;
+    int btnNewFolderX = 62, btnNewFolderY = 1;
 
     void HandleMouse();
 
@@ -68,5 +94,23 @@ private:
     uint64_t totalSize;
 
     std::string statusMessage;
-    unsigned long long statusMessageTime; // use 64-bit time from GetTickCount64()
-};  
+    unsigned long long statusMessageTime;
+
+    std::vector<FileEntry> clipboard;
+    bool cutMode = false;
+    std::string renameOldName;
+    bool inRenameMode = false;
+    int renameY = 0;
+
+    std::vector<std::string> driveLetters;
+    int selectedDrive;
+    bool showDrivePanel;
+    int drivePanelX, drivePanelY;
+
+    std::string renameBuffer;
+    int renameIndex = -1;
+
+    bool showingAttribButtons;
+    int attribButtonsX;
+    int attribButtonsY;
+};

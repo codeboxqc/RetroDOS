@@ -45,9 +45,9 @@ void InputManager::Start() {
 
     // Enable mouse and extended flags, disable quick edit
     mode |= ENABLE_MOUSE_INPUT;
+    mode |= ENABLE_WINDOW_INPUT;        // ← NECESSARY FOR MOUSE MOVE!
     mode |= ENABLE_EXTENDED_FLAGS;
     mode &= ~ENABLE_QUICK_EDIT_MODE;
-    mode &= ~ENABLE_WINDOW_INPUT;
 
     SetConsoleMode(hIn, mode);
 

@@ -127,7 +127,7 @@
   <ItemGroup>
     <ClCompile Include="basic.cpp" />
     <ClCompile Include="ddos.cpp" />
-    <ClCompile Include="ok.cpp" />
+    <ClCompile Include="more.cpp" />
     <ClCompile Include="retro.cpp" />
     <ClCompile Include="RetroDOS.cpp" />
   </ItemGroup>
