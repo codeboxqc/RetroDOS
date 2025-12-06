@@ -1,10 +1,14 @@
+# Retro Explorer — Classic File Manager Reborn
 
 ![Version](https://img.shields.io/badge/version-1.0-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-blue.svg)
+![C++](https://img.shields.io/badge/language-C%2B%2B17-red.svg)
 ![License](https://img.shields.io/badge/license-Freeware-green.svg)
+![Console](https://img.shields.io/badge/interface-Console%20(TUI)-orange.svg)
+![Size](https://img.shields.io/badge/size-%3C%20150%20KB-brightgreen.svg)
  
 
-# Retro Explorer — A Nostalgic Windows File Manager
+ 
 
  
 
@@ -173,4 +177,67 @@ Runs instantly — single `.exe`, no installer, no dependencies.
 
 
 
+> A super-fast, nostalgic, keyboard-first file manager for Windows — written in pure C++ using only the console.  
+> Inspired by **Norton Commander**, **Volkov Commander**, and the golden era of DOS tools.
 
+Retro Explorer brings back the joy of instant navigation, two-panel workflow, and raw speed — now with mouse support, Recycle Bin, attribute toggling, and **Shift + Letter** drive switching.
+
+---
+
+### Features
+
+- Classic **dual-panel layout** (file list + rich info panel)  
+- Full **keyboard & mouse** support  
+- Multi-select (`Space`, `Ctrl+Click`, range coming soon)  
+- **Copy / Cut / Paste** (recursive folders)  
+- **Safe Delete → Recycle Bin** (undoable!)  
+- **F2 Rename** with live editing  
+- **Create New Folder** instantly  
+- **Drive switching**:  
+  - Clickable drive bar  
+  - **Shift + C** → instantly go to `C:\` (any drive!)  
+- One-click **file attributes** [R][H][A][S] toggles  
+- Retro color scheme with live status bar  
+- Ultra-lightweight: **< 150 KB** executable  
+- No dependencies — pure WinAPI + C++17  
+
+---
+
+### Screenshots
+
+![Main Screen](screenshots/main.png)  
+![Attributes](screenshots/attributes.png)  
+![Rename](screenshots/rename.png)
+
+---
+
+### Keyboard Shortcuts
+
+| Key                  | Action                              |
+|----------------------|-------------------------------------|
+| `↑ ↓ ← →`            | Navigate                            |
+| `Enter`              | Open folder                         |
+| `Space`              | Toggle selection                    |
+| `Ctrl+C` / `F5`      | Copy                                |
+| `Ctrl+X` / `F6`      | Cut (move)                          |
+| `Ctrl+V` / `F7`      | Paste                               |
+| `Del`                | Delete → Recycle Bin                |
+| `F2`                 | Rename                              |
+| `F8`                 | New Folder                          |
+| `Shift + A..Z`       | Quick drive change (e.g. `Shift+D` → D:\) |
+| `Esc`                | Exit                                |
+
+---
+
+### How to Compile (Visual Studio 2022)
+
+1. Open Visual Studio 2022  
+2. Create new **Console Application** (C++)  
+3. Replace files with: `basic.h`, `basic.cpp`, `ddos.h`, `retro.h`  
+4. Project Properties →  
+   - Character Set → **Multi-Byte**  
+   - C++ Language Standard → **C++17** or higher  
+   - Linker → Input → Add `shell32.lib`  
+5. Build → Done!  
+
+Single `.exe`, runs anywhere on Windows 7–11.
