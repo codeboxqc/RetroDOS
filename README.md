@@ -1,3 +1,9 @@
+
+![Version](https://img.shields.io/badge/version-1.0-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
+![License](https://img.shields.io/badge/license-Freeware-green.svg)
+![GPU](https://img.shields.io/badge/GPU-CUDA%20%7C%20OpenCL-orange.svg)
+
 # Retro Explorer — A Nostalgic Windows File Manager
 
  
@@ -163,7 +169,7 @@ Runs instantly — single `.exe`, no installer, no dependencies.
 
 ---
 
-### File Structure
+ 
 
 
 
