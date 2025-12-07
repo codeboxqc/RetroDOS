@@ -62,6 +62,7 @@ private:
 
     void DrawAttributeButtons();
     void ToggleFileAttribute(const fs::path& path, DWORD attribute);
+    void  DrawSysPanel();
 
 
     int btnCopyX = 5, btnCopyY = 1;

@@ -18,6 +18,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+extern void  RestoreCursor();
+
 // ==========================
 // InputManager STATIC FIELDS
 // ==========================
@@ -147,6 +149,9 @@ void InputManager::InputLoop() {
 }
 
 void InputManager::Stop() {
+
+    RestoreCursor();
+
     running.store(false, std::memory_order_release);
     if (inputThread.joinable()) inputThread.join();
 }
@@ -163,6 +168,15 @@ void InputManager::GetMousePos(int& x, int& y) {
 bool InputManager::GetMouseLeftClick() {
     return mouseLeftClick.exchange(false, std::memory_order_acquire);
 }
+
+bool InputManager::GetMouseRightClick() {
+    static bool wasPressed = false;
+    bool isPressed = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
+    bool result = isPressed && !wasPressed;
+    wasPressed = isPressed;
+    return result;
+}
+
 
 bool InputManager::GetMouseDoubleClick() {
     return mouseDoubleClick.exchange(false, std::memory_order_acquire);

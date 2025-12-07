@@ -16,6 +16,15 @@
 #include "ddos.h"
 #include "retro.h"
 #include "basic.h"
+#include "resource.h"
+
+
+static HCURSOR g_hOriginalCursor = nullptr;
+
+void SetCustomCursor();
+void RestoreCursor();
+
+
 
 // =====================
 // Explorer Implementation
@@ -151,9 +160,6 @@ std::string Explorer::GetDriveType(const std::string& drive) {
 }
 
 
-// =====================
-//   draw drive letters
-// =====================
 // =====================
 //   draw drive letters with Shift+ hint
 // =====================
@@ -972,6 +978,33 @@ void Explorer::HandleMouse() {
         return;
     }
 
+////////////////////////////////////////////////////////
+    // RIGHT CLICK HANDLING - Open in Hex Viewer
+   
+    if (InputManager::GetMouseRightClick()) {
+        if (my >= 3 && my < 3 + FILE_LIST_HEIGHT) {
+            int clicked = top + (my - 3);
+            if (clicked < (int)files.size()) {
+                const FileEntry& f = files[clicked];
+
+                // Only open files in hex viewer, not folders
+                if (!f.dir && f.name != "..") {
+                    sel = clicked;
+                    SetStatus("Opening  " + f.name);
+
+                    // Call hex viewer - it handles everything internally
+                   // OpenHexViewer(f.path.string().c_str());
+
+                    // After hex viewer closes, refresh display
+                    needsRedraw = true;
+                    needsReload = true;
+                    SetStatus("Returned from hex viewer");
+                }
+            }
+        }
+    }
+///////////////////////////////////////////////
+
     // Wheel scrolling
     if (InputManager::GetMouseWheelUp()) {
         sel = std::max(0, sel - 3);
@@ -1115,6 +1148,8 @@ void Explorer::HandleMouse() {
                         "Selected: " + files[clicked].name :
                         "Unselected: " + files[clicked].name);
                 }
+
+
                 else {
                     files[clicked].selected = !files[clicked].selected;
                     sel = clicked;
@@ -1157,6 +1192,7 @@ void Explorer::HandleMouse() {
                 showingAttribButtons = false;
                 needsRedraw = true;
             }
+
         }
     }
 }
@@ -1198,7 +1234,7 @@ void Explorer::DrawStatusBar() {
     if (selectedCount > 0) {
         status += " | Selected: " + std::to_string(selectedCount);
     }
-    status += " | F1-F4:Colors | Space:Toggle | Enter:Open | ESC:Quit";
+    status += " | F1-F3:Colors | Space:Toggle | Enter:Open | ESC:Quit";
 
     DoubleBuffer::DrawText(2, DoubleBuffer::GetHeight() - 1, status,
         colors.statusBarFg | (colors.statusBarBg << 4));
@@ -1211,6 +1247,48 @@ void Explorer::DrawStatusBar() {
         DoubleBuffer::DrawText(DoubleBuffer::GetWidth() - 12, DoubleBuffer::GetHeight() - 1,
             pageStr, colors.statusBarFg | (colors.statusBarBg << 4));
     }
+}
+
+
+
+
+
+void Explorer::DrawSysPanel()
+{
+
+    
+    DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 13, "[Control Panel]  ",
+            RED | (BLACK << 4));
+
+
+
+      //  DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 14, "Keys: Space=Toggle  Enter=Open  F5=Copy  F6=Paste  Del=Delete",
+      //      colors.infoPanelFg | (colors.infoPanelBg << 4));
+      //  DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 15, "Ctrl+A=SelectAll  Ctrl+C=Copy  Ctrl+V=Paste  Ctrl+X=Cut  ESC=Quit",
+       //     colors.infoPanelFg | (colors.infoPanelBg << 4));
+    /*
+    { "programs.cpl", "Programs & Features" },
+    { "network.cpl", "Network Connections" },
+    { "internet.cpl", "Internet Options" },
+    { "mouse.cpl", "Mouse Settings" },
+    { "keyboard.cpl", "Keyboard Settings" },
+    { "datetime.cpl", "Date & Time" },
+    { "system.cpl", "System Properties" },
+    { "display.cpl", "Display Settings" },
+    { "power.cpl", "Power Options" },
+    { "firewall.cpl", "Windows Firewall" },
+    { "hardware.cpl", "Add Hardware" },
+    { "sound.cpl", "Sound Settings" },
+    { "security.cpl", "Security Center" },
+    { "network2.cpl", "Network Control Panel" },
+    { "tablet.cpl", "Tablet PC Settings" },
+   
+    { "update.cpl", "Windows Update" },
+    { "!dir.txt", "Open Directory Listing in Notepad" }
+    */
+        
+        /////////////////////////////////////////////////////////
+
 }
 
 void Explorer::DrawInfoPanel() {
@@ -1410,13 +1488,20 @@ void Explorer::DrawInfoPanel() {
             colors.sizeColor | (colors.infoPanelBg << 4));
     }
 
-    // Controls - Updated with more shortcuts
+
+/////////////////////////////////////////////
+//     
+//    // Controls - Updated with more shortcuts
+    /*
     DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 13, "Mouse: Click=Select  Ctrl+Click=Toggle  Shift+Click=Range",
         colors.infoPanelFg | (colors.infoPanelBg << 4));
     DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 14, "Keys: Space=Toggle  Enter=Open  F5=Copy  F6=Paste  Del=Delete",
         colors.infoPanelFg | (colors.infoPanelBg << 4));
     DoubleBuffer::DrawText(2, FILE_LIST_HEIGHT + 15, "Ctrl+A=SelectAll  Ctrl+C=Copy  Ctrl+V=Paste  Ctrl+X=Cut  ESC=Quit",
         colors.infoPanelFg | (colors.infoPanelBg << 4));
+    */
+/////////////////////////////////////////////////////////
+
 
     // Status message
     if (GetTickCount64() < statusMessageTime) {
@@ -1522,6 +1607,8 @@ void Explorer::DrawUI() {
     DrawOperationButtons();
     DrawAttributeButtons();
 
+    DrawSysPanel();
+
     DoubleBuffer::ScheduleFlip();
     needsRedraw = false;
 }
@@ -1539,7 +1626,7 @@ void Explorer::Run() {
     needsRedraw = true;
     DrawUI();
 
-    
+     SetCustomCursor();
 
 
     while (true) {
@@ -1588,6 +1675,9 @@ void Explorer::Run() {
                     break;
 
                 case 27: // ESC
+
+                     
+                    RestoreCursor();
                     InputManager::Stop();
                     return;
 
@@ -1597,16 +1687,36 @@ void Explorer::Run() {
                     redrawNeeded = true;
                     break;
 
-                case 13: // ENTER
-                    if (!files.empty() && sel < (int)files.size()) {
-                        if (files[sel].dir) {
-                            cur = files[sel].path;
-                            sel = top = 0;
-                            needsReload = true;
-                            SetStatus("Opening: " + files[sel].name);
+                case 13: { // ENTER
+                    if (files.empty() || sel >= (int)files.size())
+                        break;
+
+                    const FileEntry& selected = files[sel];   // ← capture it BEFORE any change
+
+                    if (selected.dir) {
+                        if (selected.name == "..") {
+                            cur = selected.path;                 // parent folder
                         }
+                        else {
+                            cur = selected.path;                 // normal folder
+                        }
+
+                        sel = top = 0;
+                        needsReload = true;
+                        SetStatus("Opening folder: " + selected.name);
                     }
+                    else {
+                        // File → open with associated program
+                        ShellExecuteA(nullptr, "open", selected.path.string().c_str(),
+                            nullptr, nullptr, SW_SHOW);
+
+                        SetStatus("Running: " + selected.name);
+                    }
+                    needsRedraw = true;   // make sure UI updates immediately
                     break;
+                }
+
+
 
                 case 0x4800: // Up
                     if (sel > 0) { sel--; redrawNeeded = true; }
@@ -1719,88 +1829,69 @@ void Explorer::Run() {
                     redrawNeeded = true;
                     break;
 
+                   
 
-                }
+                
+                case 0x3E00: // f4
+                    colors.fileColor = MAGENTA;
+                    colors.infoPanelTitle = (BLACK) | (DGRAY << 4);
+                    colors.infoPanelBorder = (DGRAY << 4) | WHITE;
+                    colors.fileListBg = BLACK;
+                    colors.fileListFg = LGRAY;
+                    colors.fileListBorder = (DGRAY << 4) | WHITE;
+                    colors.fileListTitle = WHITE | (DGRAY << 4);
+                    colors.selectedBg = BLUE;
+                    colors.selectedFg = WHITE;
+                    colors.mouseOverBg = DGRAY;
+                    colors.statusBarBg = DGRAY;
+                    colors.statusBarFg = WHITE;
+                     
+                    SetStatus("Color F1 F3 F4");
+                    redrawNeeded = true;
+                    break;
+
+                case 0x3B00: //f1
+                    colors.fileListBg = BLACK;
+                    colors.fileListFg = BLUE;
+                    colors.fileListBorder = (BLUE << 4) | BLACK;
+                    colors.fileListTitle =BLUE | (BLACK << 4);
+                    colors.selectedBg = BLACK;
+                    colors.selectedFg = WHITE;
+                    colors.mouseOverBg = LGRAY;
+                    colors.statusBarBg = BLUE;
+                    colors.statusBarFg = WHITE;
+                    colors.dirColor = GREEN;
+                    colors.fileColor = RED;
+                    colors.extColor = RED;
+                    colors.infoPanelTitle = (BLACK) | (BLUE << 4);
+                    colors.infoPanelBorder = (BLUE << 4) | WHITE;
+                    SetStatus("Color scheme  F1 F3 F4");
+                    redrawNeeded = true;
+                    break;
+
+                case 0x3D00: // f3
+                    colors.fileListBg = BLACK;
+                    colors.fileListFg = MAGENTA;
+                    colors.infoPanelTitle = (BLACK) | (MAGENTA << 4);
+                    colors.infoPanelBorder = (MAGENTA << 4) | WHITE;
+                    colors.fileListBorder = (MAGENTA << 4) | WHITE;
+                    colors.fileListTitle = WHITE | (MAGENTA << 4);
+                    colors.selectedBg = RED;
+                    colors.selectedFg = BLACK;
+                    colors.mouseOverBg = BLUE;
+                    colors.statusBarBg = MAGENTA;
+                    colors.statusBarFg = YELLOW;
+                    colors.fileColor = GREEN;
+                    SetStatus("Color scheme F1 F3 F4");
+                    redrawNeeded = true;
+                    break;
+
+
+                 }
+
 
             } //////SHIFT
-               /*
- 
-             case 0x3F00:  // F5
-             case 9:       // TAB KEY (ASCII 9)
-                needsReload = true;
-                SetStatus("Refreshing directory...");
-                needsRedraw = true;
-                break;
-                */
-
-                /*
-                // === COLOR SCHEMES — ALT+1 / ALT+2 / ALT+3 / ALT+4 ===
-                if (key >= 0x7800 && key <= 0x7B00) {        // Alt+1 to Alt+4 range
-                    int scheme = key - 0x7800 + 1;          // 1,2,3,4
-
-                    switch (scheme) {
-                    case 1: // Alt+1 - Classic (Green)
-                        colors.fileListBg = BLACK;
-                        colors.fileListFg = LGRAY;
-                        colors.fileListBorder = (GREEN << 4) | WHITE;
-                        colors.fileListTitle = WHITE | (GREEN << 4);
-                        colors.selectedBg = LRED;
-                        colors.selectedFg = WHITE;
-                        colors.mouseOverBg = DGRAY;
-                        colors.dirColor = CYAN;
-                        colors.fileColor = LGRAY;
-                        colors.extColor = YELLOW;
-                        SetStatus("Color scheme: Classic (Alt+1)");
-                        break;
-
-                    case 2: // Alt+2 - Dark Blue
-                        colors.fileListBg = BLACK;
-                        colors.fileListFg = LGRAY;
-                        colors.fileListBorder = (DGRAY << 4) | WHITE;
-                        colors.fileListTitle = WHITE | (DGRAY << 4);
-                        colors.selectedBg = BLUE;
-                        colors.selectedFg = WHITE;
-                        colors.mouseOverBg = DGRAY;
-                        colors.statusBarBg = DGRAY;
-                        colors.statusBarFg = WHITE;
-                        SetStatus("Color scheme: Dark (Alt+2)");
-                        break;
-
-                    case 3: // Alt+3 - High Contrast
-                        colors.fileListBg = WHITE;
-                        colors.fileListFg = BLACK;
-                        colors.fileListBorder = (BLACK << 4) | WHITE;
-                        colors.fileListTitle = WHITE | (BLACK << 4);
-                        colors.selectedBg = BLACK;
-                        colors.selectedFg = WHITE;
-                        colors.mouseOverBg = LGRAY;
-                        colors.statusBarBg = BLACK;
-                        colors.statusBarFg = WHITE;
-                        colors.dirColor = BLUE;
-                        colors.fileColor = BLACK;
-                        colors.extColor = RED;
-                        SetStatus("Color scheme: High Contrast (Alt+3)");
-                        break;
-
-                    case 4: // Alt+4 - Hacker Green
-                        colors.fileListBg = BLACK;
-                        colors.fileListFg = GREEN;
-                        colors.fileListBorder = (MAGENTA << 4) | WHITE;
-                        colors.fileListTitle = WHITE | (MAGENTA << 4);
-                        colors.selectedBg = RED;
-                        colors.selectedFg = WHITE;
-                        colors.mouseOverBg = DGRAY;
-                        colors.statusBarBg = BLUE;
-                        colors.statusBarFg = YELLOW;
-                        colors.fileColor = GREEN;
-                        SetStatus("Color scheme: Hacker (Alt+4)");
-                        break;
-                    }
-
-                    needsRedraw = true;
-                      
-                }*/
-     
+              
 
             if (redrawNeeded) {
                 // Adjust viewport
@@ -1857,4 +1948,46 @@ void Explorer::Run() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
+    RestoreCursor();
+}
+
+
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Load cursor from resource using correct macro (this fixes the error!)
+// ─────────────────────────────────────────────────────────────────────────────
+void SetCustomCursor()
+{
+    // Correct way: use MAKEINTRESOURCE when the ID is an integer
+    HCURSOR hAlien = LoadCursor(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDC_CURSOR1));
+
+
+    // 1. Set for our own window (always safe)
+    SetCursor(hAlien);
+    SetClassLongPtr(GetConsoleWindow(), GCLP_HCURSOR, (LONG_PTR)hAlien);
+
+    // 2. Nuclear option: replace the SYSTEM arrow (very cool)
+     g_hOriginalCursor = CopyCursor(LoadCursor(nullptr, IDC_ARROW)); // save stock arrow
+     SystemParametersInfoW(SPI_SETCURSORS, 0, nullptr, 0);           // clean slate
+     SetSystemCursor(CopyCursor(hAlien), 32512);                    // 32512 = OCR_NORMAL
+
+}
+
+void RestoreCursor()
+{
+    // Restore our window cursor
+    HCURSOR hStock = LoadCursor(nullptr, IDC_ARROW);
+    SetCursor(hStock);
+    SetClassLongPtr(GetConsoleWindow(), GCLP_HCURSOR, (LONG_PTR)hStock);
+
+    // Restore system-wide cursor if we changed it
+
+   SystemParametersInfoW(SPI_SETCURSORS, 0, nullptr, 0);
+     SetSystemCursor(g_hOriginalCursor, 32512);
+    DestroyCursor(g_hOriginalCursor);
+     g_hOriginalCursor = nullptr;
+
 }

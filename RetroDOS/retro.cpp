@@ -16,6 +16,50 @@ std::atomic<bool> DoubleBuffer::needsFlip(false);
 // Global color scheme
 ColorScheme colors;
 
+
+void DoubleBuffer::SetupConsole()
+{
+    AllocConsole();
+    SetConsoleTitleW(L"RETRO EXPLORER");
+
+    hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);
+
+    // Wait until handles are valid
+    int attempts = 0;
+    while (hIn == INVALID_HANDLE_VALUE || hIn == NULL) {
+        Sleep(10);
+        hIn = GetStdHandle(STD_INPUT_HANDLE);
+        if (++attempts > 50) break;
+    }
+
+    // Set buffer and window size
+    COORD size = { WIDTH, HEIGHT };
+    SetConsoleScreenBufferSize(hOut, size);
+    SMALL_RECT rect = { 0, 0, WIDTH - 1, HEIGHT - 1 };
+    SetConsoleWindowInfo(hOut, TRUE, &rect);
+
+    // Cursor off
+    CONSOLE_CURSOR_INFO ci = { 1, FALSE };
+    SetConsoleCursorInfo(hOut, &ci);
+
+    // Input mode
+    DWORD mode = ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS;
+    mode &= ~ENABLE_QUICK_EDIT_MODE;
+    SetConsoleMode(hIn, mode);
+
+    // Remove maximize box
+    HWND hwnd = GetConsoleWindow();
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~WS_MAXIMIZEBOX;
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
+    // 🔑 Re‑apply buffer/window size to kill scrollbars
+    SetConsoleScreenBufferSize(hOut, size);
+    SetConsoleWindowInfo(hOut, TRUE, &rect);
+}
+
+/*
 // ---- PRIVATE: Setup console ----
 void DoubleBuffer::SetupConsole()
 {
@@ -45,7 +89,16 @@ void DoubleBuffer::SetupConsole()
     DWORD mode = ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS;
     mode &= ~ENABLE_QUICK_EDIT_MODE;
     SetConsoleMode(hIn, mode);
+
+
+    // Disable resizing
+    HWND hwnd = GetConsoleWindow();
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~WS_MAXIMIZEBOX;
+    SetWindowLong(hwnd, GWL_STYLE, style);
+
 }
+*/
 
 void DoubleBuffer::Init()
 {

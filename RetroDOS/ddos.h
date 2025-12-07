@@ -18,6 +18,7 @@ public:
 
     static bool GetMouseLeftClick();
     static bool GetMouseDoubleClick();
+    static bool GetMouseRightClick();
     static bool GetMouseWheelUp();
     static bool GetMouseWheelDown();
     static bool IsMouseInRect(int x1, int y1, int x2, int y2);

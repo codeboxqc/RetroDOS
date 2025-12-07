@@ -27,8 +27,8 @@ constexpr wchar_t BOX_H = L'─';
 constexpr wchar_t BOX_V = L'│';
 constexpr wchar_t BOX_TL = L'┌';
 constexpr wchar_t BOX_TR = L'┐';
-constexpr wchar_t BOX_BL = L'└';
-constexpr wchar_t BOX_BR = L'┘';
+constexpr wchar_t BOX_BL = L'│';//└
+constexpr wchar_t BOX_BR = L'│';//┘
 
 // Color scheme structure
 struct ColorScheme {
