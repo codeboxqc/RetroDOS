@@ -8,7 +8,8 @@
 ![Size](https://img.shields.io/badge/size-%3C%20150%20KB-brightgreen.svg)
  
 
- <img width="868" height="865" alt="app" src="https://github.com/user-attachments/assets/9a7894d4-b9ed-4517-b9fd-576582f82dbc" />
+  
+<img width="256" height="255" alt="app" src="https://github.com/user-attachments/assets/56fa619f-2f6d-4ba6-bf4e-68da6f7ca3e6" />
 
 
  
