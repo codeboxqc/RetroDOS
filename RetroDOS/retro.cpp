@@ -1,4 +1,4 @@
-﻿#define NOMINMAX
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <iostream>
@@ -21,6 +21,12 @@ void DoubleBuffer::SetupConsole()
 {
     AllocConsole();
     SetConsoleTitleW(L"RETRO EXPLORER");
+
+    // Disable resizing
+    HWND hwnd = GetConsoleWindow();
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~WS_THICKFRAME & ~WS_MAXIMIZEBOX;
+    SetWindowLong(hwnd, GWL_STYLE, style);
 
     hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     HANDLE hIn = GetStdHandle(STD_INPUT_HANDLE);

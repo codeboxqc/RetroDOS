@@ -78,6 +78,7 @@ private:
     bool mouseMoved = false;
 
     // state
+    std::vector<FileEntry> allFiles;
     std::vector<FileEntry> files;
     fs::path cur;
     int sel;
@@ -113,4 +114,10 @@ private:
     bool showingAttribButtons;
     int attribButtonsX;
     int attribButtonsY;
+
+    std::string searchBuffer;
+    bool inSearchMode = false;
+
+    void HandleSearchInput(int key);
+    void ApplyFilter();
 };

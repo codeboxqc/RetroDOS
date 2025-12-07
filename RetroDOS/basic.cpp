@@ -1,4 +1,4 @@
-﻿#define NOMINMAX
+#define NOMINMAX
 #include <windows.h>
 #include <iostream>
 #include <vector>
@@ -11,11 +11,15 @@
 #include <conio.h>
 #include <sstream>
 #include <shellapi.h>
+#include <fstream>
+#include "json.hpp"
 #pragma comment(lib, "shell32.lib")
 
 #include "ddos.h"
 #include "retro.h"
 #include "basic.h"
+
+using json = nlohmann::json;
 
 // =====================
 // Explorer Implementation
@@ -34,10 +38,10 @@ Explorer::Explorer()
     lastMouseX(-1),
     lastMouseY(-1),
     mouseMoved(false),
-    
+
     showDrivePanel(true),
-    drivePanelX(2),            
-    drivePanelY(1),             
+    drivePanelX(2),
+    drivePanelY(1),
     btnCopyX(50), btnCopyY(1),
     btnPasteX(62), btnPasteY(1),
     btnDeleteX(74), btnDeleteY(1),
@@ -50,31 +54,58 @@ Explorer::Explorer()
 
     selectedDrive(-1)
 
-   
+
 {
-    // Initialize default color scheme
-    colors.fileListBg = BLACK;
-    colors.fileListFg = LGRAY;
-    colors.fileListBorder = (GREEN << 4) | WHITE;
-    colors.fileListTitle = (BLACK) | (GREEN << 4);
-    colors.fileListHeaderBg = BLUE;
-    colors.fileListHeaderFg = WHITE;
-    colors.fileListSeparator = (BLACK << 4) | GREEN;
-    colors.infoPanelBg = BLACK;
-    colors.infoPanelFg = LGRAY;
-    colors.infoPanelBorder = (CYAN << 4) | WHITE;
-    colors.infoPanelTitle = (BLACK) | (CYAN << 4);
-    colors.selectedBg = WHITE;
-    colors.selectedFg = BLACK;
-    colors.mouseOverBg = DGRAY;
-    colors.statusBarBg = LGRAY;
-    colors.statusBarFg = BLACK;
-    colors.dirColor = CYAN;
-    colors.fileColor = LGRAY;
-    colors.extColor = YELLOW;
-    colors.sizeColor = GREEN;
-    colors.dateColor = MAGENTA;
-    colors.attrColor = YELLOW;
+    std::ifstream f("theme.json");
+    if (f.good()) {
+        json data = json::parse(f);
+        colors.fileListBg = data.value("fileListBg", BLACK);
+        colors.fileListFg = data.value("fileListFg", LGRAY);
+        colors.fileListBorder = data.value("fileListBorder", (GREEN << 4) | WHITE);
+        colors.fileListTitle = data.value("fileListTitle", (BLACK) | (GREEN << 4));
+        colors.fileListHeaderBg = data.value("fileListHeaderBg", BLUE);
+        colors.fileListHeaderFg = data.value("fileListHeaderFg", WHITE);
+        colors.fileListSeparator = data.value("fileListSeparator", (BLACK << 4) | GREEN);
+        colors.infoPanelBg = data.value("infoPanelBg", BLACK);
+        colors.infoPanelFg = data.value("infoPanelFg", LGRAY);
+        colors.infoPanelBorder = data.value("infoPanelBorder", (CYAN << 4) | WHITE);
+        colors.infoPanelTitle = data.value("infoPanelTitle", (BLACK) | (CYAN << 4));
+        colors.selectedBg = data.value("selectedBg", WHITE);
+        colors.selectedFg = data.value("selectedFg", BLACK);
+        colors.mouseOverBg = data.value("mouseOverBg", DGRAY);
+        colors.statusBarBg = data.value("statusBarBg", LGRAY);
+        colors.statusBarFg = data.value("statusBarFg", BLACK);
+        colors.dirColor = data.value("dirColor", CYAN);
+        colors.fileColor = data.value("fileColor", LGRAY);
+        colors.extColor = data.value("extColor", YELLOW);
+        colors.sizeColor = data.value("sizeColor", GREEN);
+        colors.dateColor = data.value("dateColor", MAGENTA);
+        colors.attrColor = data.value("attrColor", YELLOW);
+    } else {
+        // Initialize default color scheme
+        colors.fileListBg = BLACK;
+        colors.fileListFg = LGRAY;
+        colors.fileListBorder = (GREEN << 4) | WHITE;
+        colors.fileListTitle = (BLACK) | (GREEN << 4);
+        colors.fileListHeaderBg = BLUE;
+        colors.fileListHeaderFg = WHITE;
+        colors.fileListSeparator = (BLACK << 4) | GREEN;
+        colors.infoPanelBg = BLACK;
+        colors.infoPanelFg = LGRAY;
+        colors.infoPanelBorder = (CYAN << 4) | WHITE;
+        colors.infoPanelTitle = (BLACK) | (CYAN << 4);
+        colors.selectedBg = WHITE;
+        colors.selectedFg = BLACK;
+        colors.mouseOverBg = DGRAY;
+        colors.statusBarBg = LGRAY;
+        colors.statusBarFg = BLACK;
+        colors.dirColor = CYAN;
+        colors.fileColor = LGRAY;
+        colors.extColor = YELLOW;
+        colors.sizeColor = GREEN;
+        colors.dateColor = MAGENTA;
+        colors.attrColor = YELLOW;
+    }
 }
 
 std::string GetFileAttributes(const fs::path& path) {
@@ -133,7 +164,7 @@ void Explorer::LoadDriveLetters() {
 // =====================
 std::string Explorer::GetDriveType(const std::string& drive) {
 
-   
+
         std::string path = drive + "\\";
 
     // Call Windows API function directly with 'A' suffix
@@ -230,7 +261,7 @@ void Explorer::ToggleFileAttribute(const fs::path& path, DWORD attribute) {
 // =====================
 // Draw attribute buttons when a file is clicked
 // =====================
- 
+
 void Explorer::DrawAttributeButtons() {
     if (!showingAttribButtons || sel >= (int)files.size() || files.empty())
         return;
@@ -453,8 +484,8 @@ void Explorer::DrawOperationButtons()
     Button buttons[] = {
     {"F2-RENAME",    &Explorer::RenameSelected, 10},
     {"F5-COPY",      &Explorer::CopySelected, 9},
-    {"F6-CUT",       &Explorer::CutSelected, 8},      
-    {"F7-PASTE",     &Explorer::PasteClipboard, 10},  
+    {"F6-CUT",       &Explorer::CutSelected, 8},
+    {"F7-PASTE",     &Explorer::PasteClipboard, 10},
     {"F8-NEW",       &Explorer::CreateNewFolder, 8},
     {"F9-CLEAR",     &Explorer::ClearSelection, 10},
     {"DEL-DELETE",   &Explorer::DeleteSelected, 11}
@@ -526,7 +557,7 @@ void Explorer::CopySelected() {
     }
 }
 
- 
+
 
 // =====================
 // Helper function for Rename
@@ -546,7 +577,7 @@ void Explorer::RenameSelected() {
     needsRedraw = true;
 }
 
- 
+
 
 
 // =====================
@@ -796,14 +827,14 @@ void Explorer::SetStatus(const std::string& msg, unsigned long duration) {
 }
 
 void Explorer::LoadDirectory() {
-    files.clear();
+    allFiles.clear();
     totalFiles = 0;
     totalDirs = 0;
     totalSize = 0;
 
     // Add parent directory
     if (cur.has_parent_path() && cur.parent_path() != cur) {
-        files.push_back({ "..", true, 0, "", cur.parent_path(), false });
+        allFiles.push_back({ "..", true, 0, "", cur.parent_path(), false });
         totalDirs++;
     }
 
@@ -834,17 +865,18 @@ void Explorer::LoadDirectory() {
             strftime(timebuf, sizeof(timebuf), "%Y-%m-%d %H:%M", &timeinfo);
             fe.date = timebuf;
 
-            files.push_back(std::move(fe));
+            allFiles.push_back(std::move(fe));
         }
         catch (...) {}
     }
 
     // Sort directories first, then by name
-    std::sort(files.begin(), files.end(), [](const FileEntry& a, const FileEntry& b) {
+    std::sort(allFiles.begin(), allFiles.end(), [](const FileEntry& a, const FileEntry& b) {
         if (a.dir != b.dir) return a.dir > b.dir;
         return _stricmp(a.name.c_str(), b.name.c_str()) < 0;
         });
 
+    ApplyFilter();
     needsReload = false;
     SetStatus("Loaded " + std::to_string(files.size()) + " items");
 }
@@ -956,7 +988,7 @@ void Explorer::DrawFileList() {
 }
 
 // =====================
-//  HandleMouse()  
+//  HandleMouse()
 // =====================
 void Explorer::HandleMouse() {
     int mx, my;
@@ -1431,7 +1463,7 @@ void Explorer::DrawInfoPanel() {
 
 
 // =====================
-//  HandleRenameInput()  
+//  HandleRenameInput()
 // =====================
 void Explorer::HandleRenameInput(int key) {
     if (!inRenameMode) return;
@@ -1509,18 +1541,68 @@ void Explorer::HandleRenameInput(int key) {
     }
 }
 
+void Explorer::HandleSearchInput(int key) {
+    if (!inSearchMode) return;
+
+    if (key == 13 || key == 27) { // Enter or Esc
+        inSearchMode = false;
+        if (key == 27) { // If Esc, clear the search buffer
+            searchBuffer.clear();
+            ApplyFilter();
+        }
+        SetStatus("Search finished", 2000);
+        needsRedraw = true;
+    }
+    else if (key == 8) { // Backspace
+        if (!searchBuffer.empty()) {
+            searchBuffer.pop_back();
+            ApplyFilter();
+            needsRedraw = true;
+        }
+    }
+    else if (key >= 32 && key <= 126) { // Printable characters
+        searchBuffer += (char)key;
+        ApplyFilter();
+        needsRedraw = true;
+    }
+}
+
+void Explorer::ApplyFilter() {
+    if (searchBuffer.empty()) {
+        files = allFiles;
+        needsRedraw = true;
+        return;
+    }
+
+    files.clear();
+    for (const auto& file : allFiles) {
+        if (file.name.find(searchBuffer) != std::string::npos) {
+            files.push_back(file);
+        }
+    }
+
+    sel = 0;
+    top = 0;
+    needsRedraw = true;
+}
+
 
 void Explorer::DrawUI() {
     DoubleBuffer::ClearBoth(colors.fileListFg | (colors.fileListBg << 4));
 
     DrawFileList();
     DrawInfoPanel();
-    DrawStatusBar(); 
-  
-   
+    DrawStatusBar();
+
+
     DrawDriveLetters();
     DrawOperationButtons();
     DrawAttributeButtons();
+
+    if (inSearchMode) {
+        std::string search_text = "Search: " + searchBuffer;
+        DoubleBuffer::DrawText(2, DoubleBuffer::GetHeight() - 2, search_text, colors.statusBarFg | (colors.statusBarBg << 4));
+    }
 
     DoubleBuffer::ScheduleFlip();
     needsRedraw = false;
@@ -1528,7 +1610,7 @@ void Explorer::DrawUI() {
 
 void Explorer::Run() {
     DoubleBuffer::Init();
-    Sleep(50);      
+    Sleep(50);
 
     SetConsoleTitleW(L"RETRO EXPLORER v6.0 ");
     LoadDriveLetters();
@@ -1539,7 +1621,7 @@ void Explorer::Run() {
     needsRedraw = true;
     DrawUI();
 
-    
+
 
 
     while (true) {
@@ -1551,7 +1633,7 @@ void Explorer::Run() {
        // char buf2[64];
        // sprintf_s(buf2, "KEY PRESSED: 0x%04X (%d)", key & 0xFFFF, key & 0xFFFF);
        // DoubleBuffer::DrawText(25, 500, buf2, WHITE | (RED << 4));
-         
+
         ///////////////////////////////////////////////////////
 
         if (key != 0) {
@@ -1559,6 +1641,11 @@ void Explorer::Run() {
             if (inRenameMode) {
                 HandleRenameInput(key);
                 continue;  // Skip other key handling during rename
+            }
+
+            if (inSearchMode) {
+                HandleSearchInput(key);
+                continue;
             }
 
             bool redrawNeeded = false;
@@ -1569,13 +1656,22 @@ void Explorer::Run() {
                 if ((key >= 'A' && key <= 'Z') || (key >= 'a' && key <= 'z')) {
                     ChangeDriveByLetter((char)key);
                     redrawNeeded = true;
-                    
+
                 }
             }
-             
+
             else {  //////SHIFT
 
                 switch (key) {
+                case 'f':
+                case 'F':
+                    if (GetKeyState(VK_CONTROL) & 0x8000) {
+                        inSearchMode = true;
+                        searchBuffer.clear();
+                        SetStatus("SEARCH: Type to filter | ENTER=Accept | ESC=Cancel", 99999);
+                        needsRedraw = true;
+                    }
+                    break;
                 case 32: // SPACE BAR - Toggle selection
 
                     if (!files.empty() && sel < (int)files.size()) {
@@ -1683,7 +1779,7 @@ void Explorer::Run() {
 
                 case 'x':
                 case 'X':       // Ctrl+X for Cut
-                case 0x4000:     // F6  
+                case 0x4000:     // F6
                     if (GetKeyState(VK_CONTROL) & 0x8000) {
                         CutSelected();
                         redrawNeeded = true;
@@ -1724,7 +1820,7 @@ void Explorer::Run() {
 
             } //////SHIFT
                /*
- 
+
              case 0x3F00:  // F5
              case 9:       // TAB KEY (ASCII 9)
                 needsReload = true;
@@ -1798,9 +1894,9 @@ void Explorer::Run() {
                     }
 
                     needsRedraw = true;
-                      
+
                 }*/
-     
+
 
             if (redrawNeeded) {
                 // Adjust viewport
@@ -1823,7 +1919,7 @@ void Explorer::Run() {
         HandleDriveSelection(mx, my);
         // ==========================================================================
     // DEBUG MOUSE — PUT THIS IN YOUR MAIN LOOP
-        
+
         InputManager::GetMousePos(mx, my);
         char buf[80];
         sprintf_s(buf, "MOUSE: X=%03d Y=%03d | LClick=%d | WheelUp=%d | Alive=%s",
