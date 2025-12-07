@@ -8,15 +8,21 @@
 ![Size](https://img.shields.io/badge/size-%3C%20150%20KB-brightgreen.svg)
  
 
- 
+ <img width="868" height="865" alt="app" src="https://github.com/user-attachments/assets/9a7894d4-b9ed-4517-b9fd-576582f82dbc" />
+
 
  
 
 > A lightweight, retro-style file manager for Windows, built entirely in C++ using only the Windows console. Inspired by Norton Commander, Volkov Commander, and the golden age of DOS file managers.
 
 **Retro Explorer** delivers blazing-fast navigation, full keyboard control, mouse support, and modern conveniences — all while staying true to that classic two-panel aesthetic.
+![Untitled](https://github.com/user-attachments/assets/07e279c4-ed97-4bbe-a354-9ccabe9338f1)
 
 ---
+
+https://github.com/user-attachments/assets/d3126f44-fbeb-44fd-9e82-e3eb42ccc049
+
+
 
 ### Features
 
